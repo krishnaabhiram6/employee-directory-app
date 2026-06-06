@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Employee Directory</title>
+
+    <style>
+
+    body{
+        font-family: Arial, sans-serif;
+        background:#f1f5f9;
+        margin:0;
+        padding:40px;
+    }
+
+    .container{
+        max-width:1000px;
+        margin:auto;
+        background:white;
+        padding:30px;
+        border-radius:15px;
+        box-shadow:0 0 20px rgba(0,0,0,0.15);
+    }
+
+    h1{
+        text-align:center;
+        color:#1e293b;
+        margin-bottom:30px;
+    }
+
+    h2{
+        color:#334155;
+    }
+
+    .row{
+        display:flex;
+        gap:10px;
+        margin-bottom:15px;
+        flex-wrap:wrap;
+    }
+
+    input{
+        padding:12px;
+        border:1px solid #cbd5e1;
+        border-radius:8px;
+        width:220px;
+        font-size:15px;
+    }
+
+    button{
+        background:#2563eb;
+        color:white;
+        border:none;
+        padding:12px 18px;
+        border-radius:8px;
+        cursor:pointer;
+        font-size:15px;
+    }
+
+    button:hover{
+        background:#1d4ed8;
+    }
+
+    hr{
+        margin:25px 0;
+    }
+
+    #output{
+        display:grid;
+        grid-template-columns:repeat(auto-fill,minmax(280px,1fr));
+        gap:20px;
+        margin-top:20px;
+    }
+
+    .employee{
+        background:#ffffff;
+        border-left:6px solid #2563eb;
+        border-radius:12px;
+        padding:20px;
+        box-shadow:0 3px 10px rgba(0,0,0,0.1);
+    }
+
+    .employee h3{
+        margin-top:0;
+        color:#1e293b;
+    }
+
+    .employee p{
+        margin:8px 0;
+        color:#475569;
+    }
+
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <h1>Employee Directory</h1>
+
+    <h2>Add Employee</h2>
+
+    <div class="row">
+        <input id="name" placeholder="Employee Name">
+        <input id="department" placeholder="Department">
+        <input id="salary" placeholder="Salary">
+        <button onclick="addEmployee()">
+            Add Employee
+        </button>
+    </div>
+
+    <hr>
+
+    <div class="row">
+        <button onclick="loadEmployees()">
+            Show Employees
+        </button>
+    </div>
+
+    <div class="row">
+        <input id="searchName" placeholder="Search Employee">
+        <button onclick="searchEmployee()">
+            Search
+        </button>
+    </div>
+
+    <div class="row">
+        <input id="filterDept" placeholder="Department">
+        <button onclick="filterEmployees()">
+            Filter
+        </button>
+    </div>
+
+    <hr>
+
+    <div id="output"></div>
+
+</div>
+
+<script>
+
+function displayEmployees(data) {
+
+    let output =
+        document.getElementById("output");
+
+    output.innerHTML = "";
+
+    for(let i = 0; i < data.length; i++) {
+
+        output.innerHTML += `
+        <div class="employee">
+            <h3>${data[i].name}</h3>
+
+            <p><strong>ID:</strong> ${data[i].id}</p>
+
+            <p><strong>Department:</strong>
+            ${data[i].department}</p>
+
+            <p><strong>Salary:</strong>
+            ₹${data[i].salary}</p>
+
+        </div>
+        `;
+    }
+}
+
+
+async function loadEmployees() {
+
+    let response =
+        await fetch("http://127.0.0.1:8000/employees");
+
+    let data =
+        await response.json();
+
+    displayEmployees(data);
+}
+
+
+async function addEmployee() {
+
+    let employeeData = {
+
+        name:
+        document.getElementById("name").value,
+
+        department:
+        document.getElementById("department").value,
+
+        salary:
+        Number(
+            document.getElementById("salary").value
+        )
+    };
+
+    await fetch(
+        "http://127.0.0.1:8000/employees",
+        {
+            method: "POST",
+
+            headers: {
+                "Content-Type": "application/json"
+            },
+
+            body: JSON.stringify(employeeData)
+        }
+    );
+
+    loadEmployees();
+}
+
+
+async function searchEmployee() {
+
+    let name =
+        document.getElementById("searchName").value;
+
+    let response =
+        await fetch(
+            "http://127.0.0.1:8000/employees/search/" + name
+        );
+
+    let data =
+        await response.json();
+
+    displayEmployees(data);
+}
+
+
+async function filterEmployees() {
+
+    let department =
+        document.getElementById("filterDept").value;
+
+    let response =
+        await fetch(
+            "http://127.0.0.1:8000/employees/department/" + department
+        );
+
+    let data =
+        await response.json();
+
+    displayEmployees(data);
+}
+
+</script>
+
+</body>
+</html>
